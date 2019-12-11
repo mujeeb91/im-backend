@@ -22,7 +22,7 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
 
-def populate_seed_data():
+def insert_seed_data():
     is_empty_database = User.query.count() == 0
     if not is_empty_database:
         return

@@ -1,11 +1,11 @@
-import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 # User model has to be imported after initializing db variable
-from .model import User, populate_seed_data
+from .model import User, insert_seed_data
+from .auth import auth as auth_blueprint
 
 
 def create_app(test_config=None):
@@ -21,19 +21,11 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    # blueprints for routes in our app
+    app.register_blueprint(auth_blueprint)
 
     with app.app_context():
         db.create_all()
-        populate_seed_data()
+        insert_seed_data()
 
     return app
