@@ -6,6 +6,7 @@ db = SQLAlchemy()
 # User model has to be imported after initializing db variable
 from .model import User, insert_seed_data
 from .auth import auth as auth_blueprint
+from .message import message as message_blueprint
 
 
 def create_app(test_config=None):
@@ -23,6 +24,7 @@ def create_app(test_config=None):
 
     # blueprints for routes in our app
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(message_blueprint)
 
     with app.app_context():
         db.create_all()
