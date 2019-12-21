@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, current_app as app, jsonify, request, Response
+from flask import Blueprint, current_app as app, jsonify, request
 from flask_api import status
 import jwt
 from jwt.exceptions import ExpiredSignatureError
@@ -17,10 +17,11 @@ def token_required(f):
         if not token:
             return jsonify({'message': 'Token is missing'}), status.HTTP_403_FORBIDDEN
         try:
-            jwt.decode(token, app.config['SECRET_KEY'])
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.query.filter_by(id=data['user_id']).first()
         except ExpiredSignatureError:
             return jsonify({'message': 'Token is invalid'}), status.HTTP_403_FORBIDDEN
-        return f(*args, **kwargs)
+        return f(current_user, *args, **kwargs)
     return decorated
 
 
@@ -32,7 +33,7 @@ def login():
     if user and check_password_hash(user.password, password):
         token = jwt.encode(
             {
-                'username': username,
+                'user_id': user.id,
                 'exp': datetime.utcnow() + timedelta(minutes=10)
             },
             app.config['SECRET_KEY']
